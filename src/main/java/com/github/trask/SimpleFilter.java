@@ -35,6 +35,8 @@ import org.apache.felix.scr.annotations.sling.SlingFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.microsoft.applicationinsights.web.internal.WebRequestTrackingFilter;
+
 /**
  * A Simple Filter
  * 
@@ -55,17 +57,21 @@ public class SimpleFilter implements Filter {
     
     private final Logger log = LoggerFactory.getLogger(SimpleFilter.class);
 
+    private WebRequestTrackingFilter webRequestTrackingFilter = new WebRequestTrackingFilter("myapp");
+
     public void init(FilterConfig filterConfig) throws ServletException {
+        webRequestTrackingFilter.init(filterConfig);
     }
 
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
             ServletException {
         log.info("filter invoked - start");
-        chain.doFilter(request, response);
+        webRequestTrackingFilter.doFilter(request, response, chain);
         log.info("filter invoked - end");
     }
 
     public void destroy() {
+        webRequestTrackingFilter.destroy();
     }
 
 }
