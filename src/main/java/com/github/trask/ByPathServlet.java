@@ -19,18 +19,28 @@
 package com.github.trask;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Writer;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 import javax.servlet.ServletException;
 
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.sling.SlingServlet;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.microsoft.applicationinsights.core.dependencies.google.common.io.ByteStreams;
 
 /**
  * Hello World Servlet registered by path
@@ -59,6 +69,8 @@ public class ByPathServlet extends SlingSafeMethodsServlet {
     protected void doGet(SlingHttpServletRequest request,
             SlingHttpServletResponse response) throws ServletException,
             IOException {
+
+        int responseCode = get("https://www.bing.com");
         
         Writer w = response.getWriter();
         w.write("<!DOCTYPE html PUBLIC \"-//IETF//DTD HTML 2.0//EN\">");
@@ -68,6 +80,7 @@ public class ByPathServlet extends SlingSafeMethodsServlet {
         w.write("</head>");
         w.write("<body>");
         w.write("<h1>Hello World!</h1>");
+        w.write("<h2>Response code: " + responseCode + "</h2>");
         w.write("</body>");
         w.write("</html>");
         
@@ -75,5 +88,13 @@ public class ByPathServlet extends SlingSafeMethodsServlet {
         
     }
 
+    private static int get(String url) throws IOException {
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+        HttpGet httpGet = new HttpGet(url);
+        HttpResponse response = httpClient.execute(httpGet);
+        EntityUtils.consume(response.getEntity());
+        httpClient.close();
+        return response.getStatusLine().getStatusCode();
+    }
 }
 
